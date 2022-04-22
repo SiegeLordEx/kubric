@@ -14,6 +14,7 @@
 """Model for redirection of stdout/err to file."""
 
 import ctypes
+import io
 import os
 
 
@@ -42,7 +43,7 @@ class RedirectStream(object):
       self.fd = open(self.filename, "w+", encoding="utf-8")  # pylint: disable=consider-using-with
       self.dup_stream = os.dup(self.stream.fileno())
       os.dup2(self.fd.fileno(), self.stream.fileno())  # replaces stream
-    except Exception as e:  # pylint: disable=broad-except
+    except io.UnsupportedOperation as e:
       # TODO: redirect stream breaks in jupyter notebooks.
       #       This try except is a hacky workaround
       print(e)
@@ -54,7 +55,7 @@ class RedirectStream(object):
       os.dup2(self.dup_stream, self.stream.fileno())  # restores stream
       os.close(self.dup_stream)
       self.fd.close()
-    except:  # pylint: disable=bare-except
+    except io.UnsupportedOperation:
       # TODO: redirect stream breaks in jupyter notebooks.
       #       This try except is a hacky workaround
       pass
